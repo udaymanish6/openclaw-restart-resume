@@ -16,6 +16,23 @@ ClawHub: https://clawhub.ai/udaymanish6/gateway-restart-resume
 
 Gateway restart is a conversation-continuity problem. An in-gateway OpenClaw agent that restarts the gateway kills the runtime that would normally send the follow-up reply. Before taking any gateway-killing action, create a durable resume path that can verify recovery and report back through the same medium, conversation, channel, thread, or user route.
 
+## Runtime Tool Preflight
+
+Before any in-gateway restart attempt, verify that the current runtime exposes a durable control path:
+
+- `cron` or an equivalent durable task tool for the resume callback.
+- `gateway` or `exec` for the restart action.
+- A delivery path for the original medium, such as cron `announce` delivery, the original session route, or an approved channel send mechanism.
+
+If any required path is unavailable, do not restart. Reply in the current conversation with a short degraded status:
+
+```text
+I did not restart the gateway because this runtime cannot create a durable post-restart callback first.
+Needed before retry: cron/task callback access plus gateway/exec restart access.
+```
+
+Never replace this preflight with best-effort memory, a note in the transcript, or an instruction to yourself. The callback must be durable outside the current in-gateway turn.
+
 ## When to Use
 
 Use this skill when:
@@ -50,6 +67,7 @@ Do not use this skill for external shell operators that can survive the restart 
    - Prefer a one-shot or short-delay OpenClaw cron job, task, or native gateway callback that survives the gateway restart.
    - The callback must include the reply target and verification checklist.
    - If callback creation fails, do not restart. Tell the user the restart was not attempted because no follow-up path exists.
+   - For OpenClaw cron, prefer a one-shot job with delete-after-run enabled and fallback delivery/announce pointed at the original medium target.
 
 6. Restart only after the callback exists.
    - Use the narrowest approved restart action.
@@ -66,6 +84,7 @@ Do not use this skill for external shell operators that can survive the restart 
    - Use the operator report format below unless the original medium requires a shorter message.
    - State whether restart completed, what was verified, duration if known, and any remaining warning.
    - If verification fails, report the failed check and the safest next action.
+   - Translate raw tool results into human status. Never paste raw strings such as `gateway.restart`, `restart ok`, `restart restart ok`, method names, JSON payloads, or internal reason text into the user-facing reply.
 
 ## Medium-Agnostic Reply Rules
 
@@ -145,11 +164,20 @@ Do not claim the restart succeeded unless fresh verification output supports it.
 
 Prefer this operator report for human-facing media that can handle multi-line messages.
 
+Output must be written as a clean operator status, not as a tool transcript.
+
+Do not include:
+
+- Raw tool names or method names, such as `gateway.restart`.
+- Duplicated/generated phrases, such as "restart restart ok".
+- Internal reason payloads unless the user explicitly asks for them.
+- "Recommended follow-up: run openclaw doctor..." after a successful restart. Only suggest a terminal command when verification failed or is genuinely blocked.
+
 Before restart:
 
 ```text
 Restarting the OpenClaw gateway now.
-I created a resume check and will reply here after the gateway is back and verified.
+I will reply here after it comes back.
 ```
 
 After success:
@@ -158,14 +186,12 @@ After success:
 Gateway restart complete.
 
 Verified:
-- Gateway: <running/admin-capable/version if known>
-- Health: <ok/degraded>
-- Original medium: <connected/reply sent/not directly testable>
-- Extra checks: <plugins/tasks/update checks or "not needed">
+- Gateway: back online
+- Discord: reply path restored
+- Resume: this follow-up reached the original thread
 
 Duration: <duration or "not recorded">
-Warnings: <none or short warning>
-Next action: <none or operator action>
+Warnings: <none or one short warning>
 ```
 
 After degraded recovery:
@@ -179,7 +205,7 @@ Passed:
 Needs attention:
 - <failed or warning check>
 
-I did not take further action automatically. Safest next action: <next step>.
+Safest next action: <next step>.
 ```
 
 After failure:

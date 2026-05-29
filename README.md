@@ -17,6 +17,31 @@ Use this when OpenClaw is controlled from Discord, Slack, Matrix, SMS, email, we
 
 Without this protocol, an in-gateway agent can truthfully start a restart but never return to say whether the restart worked.
 
+## Current Behavior
+
+- Requires a durable callback path before restart: `cron` or equivalent task scheduling.
+- Requires a restart path: native gateway restart tool or approved shell execution.
+- Requires a delivery route back to the original medium, channel, thread, or conversation.
+- Refuses to restart if the callback path cannot be created first.
+- Keeps the resume payload minimal: routing metadata and verification checks only.
+- Produces a clean human status message after restart instead of raw tool output.
+
+Successful post-restart replies should look like:
+
+```text
+Gateway restart complete.
+
+Verified:
+- Gateway: back online
+- Discord: reply path restored
+- Resume: this follow-up reached the original thread
+
+Duration: not recorded
+Warnings: none
+```
+
+The skill explicitly tells agents not to paste raw tool strings such as `gateway.restart`, duplicated phrases like `restart restart ok`, JSON payloads, internal reason text, or terminal follow-up recommendations after a successful restart.
+
 ## Install
 
 ```bash
