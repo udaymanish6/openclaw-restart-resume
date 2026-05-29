@@ -1,5 +1,5 @@
 ---
-name: openclaw-restart-resume
+name: gateway-restart-resume
 description: Use when an OpenClaw agent is asked from Discord, chat, cron, ACP, or another gateway-backed channel to restart, stop, reload, or update the gateway and the agent must reply again after the gateway comes back.
 ---
 

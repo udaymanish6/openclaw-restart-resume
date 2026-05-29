@@ -1,4 +1,4 @@
 interface:
   display_name: "OpenClaw Restart Resume"
   short_description: "Post-restart reply protocol"
-  default_prompt: "Use $openclaw-restart-resume to restart OpenClaw without losing the Discord follow-up."
+  default_prompt: "Use $gateway-restart-resume to restart OpenClaw without losing the Discord follow-up."
