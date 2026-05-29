@@ -29,6 +29,12 @@ ClawHub:
 https://clawhub.ai/udaymanish6/gateway-restart-resume
 ```
 
+GitHub:
+
+```text
+https://github.com/udaymanish6/openclaw-restart-resume
+```
+
 ## What It Does Not Do
 
 - It does not restart OpenClaw by itself.

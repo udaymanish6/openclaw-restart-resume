@@ -1,9 +1,16 @@
 ---
 name: gateway-restart-resume
 description: Use when an OpenClaw agent is asked from any gateway-backed medium to restart, stop, reload, update, or repair the gateway and the agent must reply again after the gateway comes back.
+metadata:
+  repository: "https://github.com/udaymanish6/openclaw-restart-resume"
+  homepage: "https://clawhub.ai/udaymanish6/gateway-restart-resume"
 ---
 
 # OpenClaw Restart Resume
+
+GitHub: https://github.com/udaymanish6/openclaw-restart-resume
+
+ClawHub: https://clawhub.ai/udaymanish6/gateway-restart-resume
 
 ## Overview
 
