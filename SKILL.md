@@ -1,16 +1,9 @@
 ---
 name: gateway-restart-resume
-description: Use when an OpenClaw agent is asked from any gateway-backed medium to restart, stop, reload, update, or repair the gateway and the agent must reply again after the gateway comes back.
-metadata:
-  repository: "https://github.com/udaymanish6/openclaw-restart-resume"
-  homepage: "https://clawhub.ai/udaymanish6/gateway-restart-resume"
+description: Use when an OpenClaw gateway-backed agent is asked through Discord, Slack, Matrix, SMS, web chat, CLI relay, ACP, cron, or another channel to restart, stop, reload, update, or repair the gateway and needs a durable post-restart callback, same-thread reply, recovery status, or lost follow-up prevention.
 ---
 
 # OpenClaw Restart Resume
-
-GitHub: https://github.com/udaymanish6/openclaw-restart-resume
-
-ClawHub: https://clawhub.ai/udaymanish6/gateway-restart-resume
 
 ## Overview
 
@@ -32,6 +25,18 @@ Needed before retry: cron/task callback access plus gateway/exec restart access.
 ```
 
 Never replace this preflight with best-effort memory, a note in the transcript, or an instruction to yourself. The callback must be durable outside the current in-gateway turn.
+
+## Pre-Restart Gate
+
+Before any restart, explicitly satisfy every item:
+
+- Durable callback created outside the current in-gateway turn.
+- Original reply route captured with no secrets or raw message bodies.
+- Short pre-restart acknowledgement sent to the user.
+- Restart action explicitly requested or approved.
+- Callback includes verification steps, bounded retry budget, and failure reporting.
+
+If any item is missing, do not restart. Report the missing prerequisite in the current conversation.
 
 ## When to Use
 
@@ -68,6 +73,7 @@ Do not use this skill for external shell operators that can survive the restart 
    - The callback must include the reply target and verification checklist.
    - If callback creation fails, do not restart. Tell the user the restart was not attempted because no follow-up path exists.
    - For OpenClaw cron, prefer a one-shot job with delete-after-run enabled and fallback delivery/announce pointed at the original medium target.
+   - For cron-specific command shape, read [references/openclaw-cron-resume.md](references/openclaw-cron-resume.md) only when using OpenClaw cron.
 
 6. Restart only after the callback exists.
    - Use the narrowest approved restart action.
@@ -148,7 +154,7 @@ Do not claim the restart succeeded unless fresh verification output supports it.
 - Callback creation fails: do not restart; explain that there is no durable way to report back.
 - Restart command fails before shutdown: report the command failure immediately in the current medium.
 - Gateway returns but the original medium is disconnected: report through any still-available approved fallback route, or leave a durable task/ops note for the operator.
-- Gateway does not return: the callback should record the failure in durable state and stop retrying after a bounded number of attempts.
+- Gateway does not return: retry verification up to 3 total attempts over about 5 minutes, then record the failure in durable state and stop.
 - Auth/token errors appear: do not read or paste secrets. Report the config path/key names only and ask for explicit operator direction.
 
 ## Common Mistakes

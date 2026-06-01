@@ -22,8 +22,10 @@ Without this protocol, an in-gateway agent can truthfully start a restart but ne
 - Requires a durable callback path before restart: `cron` or equivalent task scheduling.
 - Requires a restart path: native gateway restart tool or approved shell execution.
 - Requires a delivery route back to the original medium, channel, thread, or conversation.
+- Requires a hard pre-restart gate: callback created, route captured, acknowledgement sent, restart approved, and retry/failure reporting defined.
 - Refuses to restart if the callback path cannot be created first.
 - Keeps the resume payload minimal: routing metadata and verification checks only.
+- Bounds failed recovery retries to 3 total attempts over about 5 minutes.
 - Produces a clean human status message after restart instead of raw tool output.
 
 Successful post-restart replies should look like:
